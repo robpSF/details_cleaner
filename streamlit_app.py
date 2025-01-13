@@ -15,6 +15,8 @@ def clean_text(text):
     text = re.sub(r'@\w+', '', text)
     # Remove email addresses
     text = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', text)
+    # Replace '|' with 'I'
+    text = text.replace('|', 'I')
 
     return text.strip()
 
