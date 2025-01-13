@@ -4,13 +4,18 @@ import re
 from io import BytesIO
 
 # Utility function to remove URLs, mentions, and emails
-def clean_text(text: str) -> str:
-    # Remove "https://t.co/..." substrings
+def clean_text(text):
+    # If the text is literally 'nan', return an empty string
+    if text.lower() == "nan":
+        return ""
+
+    # Remove "https://t.co/..." links
     text = re.sub(r'https://t\.co/\S+', '', text)
     # Remove @mentions
     text = re.sub(r'@\w+', '', text)
     # Remove email addresses
     text = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', text)
+
     return text.strip()
 
 def main():
