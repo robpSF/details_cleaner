@@ -3,7 +3,7 @@ import pandas as pd
 import re
 from io import BytesIO
 
-# Utility function to remove URLs, mentions, and emails
+# Utility function to remove URLs, mentions
 def clean_text(text):
     # If the text is literally 'nan', return an empty string
     if text.lower() == "nan":
@@ -14,14 +14,14 @@ def clean_text(text):
     # Remove @mentions
     text = re.sub(r'@\w+', '', text)
     # Remove email addresses
-    text = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', text)
+    # text = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', text)
     # Replace '|' with 'I'
     text = text.replace('|', 'I')
 
     return text.strip()
 
 def main():
-    st.title("Excel Cleaner: Remove Links, Mentions, and Emails")
+    st.title("Excel Cleaner: Remove Twitter Links (t.co), Mentions, and converts | pipe to I capital i ")
 
     uploaded_file = st.file_uploader("Upload an Excel (.xlsx) file", type=["xlsx"])
     if uploaded_file is not None:
