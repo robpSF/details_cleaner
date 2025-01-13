@@ -72,7 +72,7 @@ def main():
                 st.markdown(f"**Name**: {person_name}, **Handle**: {person_handle}")
                 # Show each column replacement
                 for (col, old_val, new_val) in changes_list:
-                    st.markdown(f"&emsp;**Column**: `{col}` replaced `{old_val}` with `{new_val}`")
+                    st.markdown(f"&emsp;**Column**: `{col}`")
         else:
             st.write("No replacements were necessary.")
 
