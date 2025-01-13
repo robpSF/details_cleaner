@@ -12,7 +12,7 @@ def clean_text(text):
     # Remove "https://t.co/..." links
     text = re.sub(r'https://t\.co/\S+', '', text)
     # Remove @mentions
-    text = re.sub(r'(?<=^|\s)@\w+', '', text)
+    text = re.sub(r'(?<![\w\.-])@\w+', '', text)
     # Remove email addresses
     # text = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', text)
     # Replace '|' with 'I'
