@@ -35,7 +35,8 @@ def main():
         output = BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df.to_excel(writer, index=False)
-            writer.save()
+            # writer.save()  # Remove this line; it's unnecessary and causes an error in pandas >= 2.x
+
         processed_data = output.getvalue()
 
         # Provide a download button for the cleaned XLSX
