@@ -11,11 +11,7 @@ def clean_text(text: str) -> str:
     # Remove @mentions
     text = re.sub(r'@\w+', '', text)
     # Remove email addresses
-    text = re.sub(
-        r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+',
-        '',
-        text
-    )
+    text = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', text)
     return text.strip()
 
 def main():
@@ -29,9 +25,11 @@ def main():
         st.write("### Original Data (first 5 rows):")
         st.dataframe(df.head())
 
-        # Step 3: Prepare to track modifications
-        # We'll store a list of (Name, Handle, Column, OldValue, NewValue) for each change
+        # Step 3: Prepare to track modifications and warnings
+        # We'll store a list of (Name, Handle, Column) when the cell changes
         modifications = []
+        # We'll store a list of (Name, Handle, Column) if we find ",,"
+        warnings = []
 
         # Step 4: Clean Data
         for i in range(len(df)):
@@ -42,11 +40,17 @@ def main():
             for col in df.columns:
                 old_val = str(df.at[i, col])
                 new_val = clean_text(old_val)
-                
+
                 # If the text changed, record the replacement details
                 if new_val != old_val:
-                    modifications.append((name, handle, col, old_val, new_val))
-                    df.at[i, col] = new_val
+                    modifications.append((name, handle, col))
+
+                # Check if the cleaned text contains ",,"
+                if ",," in new_val:
+                    warnings.append((name, handle, col))
+
+                # Update the DataFrame with the cleaned text
+                df.at[i, col] = new_val
 
         # Step 5: Replace literal "nan" strings with empty strings
         df.replace("nan", "", inplace=True)
@@ -55,32 +59,41 @@ def main():
         st.write("### Cleaned Data (first 5 rows):")
         st.dataframe(df.head())
 
-        # Step 7: Display Replacements
+        # Step 7a: Display Replacements (columns that changed)
         if modifications:
-            st.write("### Replacements Made")
-            
+            st.write("### Columns Where Replacements Occurred")
             # Group changes by (Name, Handle)
-            changes_by_person = defaultdict(list)
-            for (person_name, person_handle, col_name, old_value, new_value) in modifications:
-                changes_by_person[(person_name, person_handle)].append(
-                    (col_name, old_value, new_value)
-                )
+            changes_by_person = defaultdict(set)
+            for (person_name, person_handle, col_name) in modifications:
+                changes_by_person[(person_name, person_handle)].add(col_name)
 
-            # Display grouped changes
-            for (person_name, person_handle), changes_list in changes_by_person.items():
-                # Show Name and Handle
+            for (person_name, person_handle), columns_changed in changes_by_person.items():
                 st.markdown(f"**Name**: {person_name}, **Handle**: {person_handle}")
-                # Show each column replacement
-                for (col, old_val, new_val) in changes_list:
-                    st.markdown(f"&emsp;**Column**: `{col}`")
+                for col in columns_changed:
+                    st.markdown(f"&emsp;• **Column**: `{col}`")
         else:
             st.write("No replacements were necessary.")
+
+        # Step 7b: Display Warnings (if ",," found)
+        if warnings:
+            st.write("### Warnings: Found Double Commas (',,')")
+            # Group warnings by (Name, Handle)
+            warnings_by_person = defaultdict(set)
+            for (person_name, person_handle, col_name) in warnings:
+                warnings_by_person[(person_name, person_handle)].add(col_name)
+
+            for (person_name, person_handle), columns_with_double_commas in warnings_by_person.items():
+                st.markdown(f"**Name**: {person_name}, **Handle**: {person_handle}")
+                for col in columns_with_double_commas:
+                    st.markdown(f"&emsp;• **Column**: `{col}` possible empty content after cleaning")
+        else:
+            st.write("No warnings found.")
 
         # Step 8: Allow Download of Cleaned File
         output = BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df.to_excel(writer, index=False)
-            # No need to call writer.save(); the context manager will handle saving.
+            # The context manager handles saving automatically.
 
         cleaned_data = output.getvalue()
 
