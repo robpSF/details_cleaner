@@ -11,10 +11,16 @@ def clean_text(text):
 
     # Remove "https://t.co/..." links
     text = re.sub(r'https://t\.co/\S+', '', text)
-    # Remove @mentions
+
+    # Remove "https://t.me/..." links
+    text = re.sub(r'https://t\.me/\S+', '', text)
+
+    # Remove .@mentions (e.g., ".@username")
+    text = re.sub(r'\.@\w+', '', text)
+
+    # Remove @mentions (where they are not preceded by alphanumeric, underscore, period, or hyphen)
     text = re.sub(r'(?<![\w\.-])@\w+', '', text)
-    # Remove email addresses
-    # text = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', text)
+
     # Replace '|' with 'I'
     text = text.replace('|', 'I')
 
