@@ -13,7 +13,7 @@ def clean_text(text):
     text = re.sub(r'https://t\.co/\S+', '', text)
 
     # Remove "https://t.me/..." links
-    text = re.sub(r'https://t\.me/\S+', '', text)
+    text = re.sub(r't\.me/\S+', '', text)
 
     # Remove .@mentions (e.g., ".@username")
     text = re.sub(r'\.@\w+', '', text)
