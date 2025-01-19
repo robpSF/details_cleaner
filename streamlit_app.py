@@ -72,6 +72,8 @@ def clean_text(text):
 def main():
     st.title("Excel Cleaner: Remove Twitter Links (t.co), Mentions, and converts | pipe to I capital i ")
 
+    run_scan = st.checkbox("Scan for .toLowerCase() BEFORE cleaning? (select TRUE for MEL)")
+
     uploaded_file = st.file_uploader("Upload an Excel (.xlsx) file", type=["xlsx"])
     if uploaded_file is not None:
         # Read the uploaded Excel file into a DataFrame
@@ -79,7 +81,9 @@ def main():
         st.write("Original Data:")
         st.dataframe(df.head())
 
-       
+       if run_scan:
+           issues_df = scan_data_issues(df)
+        
         # Clean all string entries in the DataFrame
         for col in df.columns:
             # Convert column to string to avoid errors on numeric columns, then apply cleaning
@@ -88,8 +92,10 @@ def main():
         st.write("Cleaned Data:")
         st.dataframe(df.head())
 
+        if not run_scan:
+            issues_df = scan_data_issues(df)
+
         # Scan for potential .toLowerCase() / .lower() issues
-        issues_df = scan_data_issues(df)
         if issues_df.empty:
             st.success("No issues found! Your data should be safe to use.")
         else:
