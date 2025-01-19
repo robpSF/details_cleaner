@@ -81,8 +81,8 @@ def main():
         st.write("Original Data:")
         st.dataframe(df.head())
 
-       if run_scan:
-           issues_df = scan_data_issues(df)
+        if run_scan:
+            issues_df = scan_data_issues(df)
         
         # Clean all string entries in the DataFrame
         for col in df.columns:
