@@ -3,6 +3,49 @@ import pandas as pd
 import re
 from io import BytesIO
 
+
+def scan_data_issues(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Scans the DataFrame for cells that might cause a .toLowerCase() or .lower() 
+    crash in JavaScript/Python (i.e., non-string values, NaNs, or None).
+    
+    Returns a DataFrame with rows describing each potential issue:
+    - row_index
+    - column_name
+    - value
+    - reason
+    """
+    issues = []
+    
+    for row_idx in range(len(df)):
+        for col_name in df.columns:
+            val = df.iloc[row_idx][col_name]
+            
+            # 1) Check for None/NaN
+            if pd.isna(val):
+                # If it’s genuinely NaN or None, that can cause a crash
+                issues.append({
+                    "row_index": row_idx,
+                    "column_name": col_name,
+                    "value": val,
+                    "reason": "Value is NaN/None"
+                })
+            else:
+                # 2) Attempt to call lower() in a try-except
+                #    This is what might fail if val is not a string-like object
+                try:
+                    str_val = str(val).lower()
+                except Exception as e:
+                    # If we fail to convert to string or lower, log the issue
+                    issues.append({
+                        "row_index": row_idx,
+                        "column_name": col_name,
+                        "value": val,
+                        "reason": f"Failed to lower() -> {e}"
+                    })
+    
+    return pd.DataFrame(issues)
+
 # Utility function to remove URLs, mentions
 def clean_text(text):
     # If the text is literally 'nan', return an empty string
@@ -36,6 +79,17 @@ def main():
         st.write("Original Data:")
         st.dataframe(df.head())
 
+
+        # Scan for potential .toLowerCase() / .lower() issues
+        issues_df = scan_data_issues(df)
+        if issues_df.empty:
+            st.success("No issues found! Your data should be safe to use.")
+        else:
+            st.error("Potential issues found in your data!")
+            st.dataframe(issues_df)
+
+
+        
         # Clean all string entries in the DataFrame
         for col in df.columns:
             # Convert column to string to avoid errors on numeric columns, then apply cleaning
