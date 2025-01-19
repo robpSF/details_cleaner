@@ -79,6 +79,14 @@ def main():
         st.write("Original Data:")
         st.dataframe(df.head())
 
+       
+        # Clean all string entries in the DataFrame
+        for col in df.columns:
+            # Convert column to string to avoid errors on numeric columns, then apply cleaning
+            df[col] = df[col].astype(str).apply(clean_text)
+
+        st.write("Cleaned Data:")
+        st.dataframe(df.head())
 
         # Scan for potential .toLowerCase() / .lower() issues
         issues_df = scan_data_issues(df)
@@ -88,16 +96,7 @@ def main():
             st.error("Potential issues found in your data!")
             st.dataframe(issues_df)
 
-
         
-        # Clean all string entries in the DataFrame
-        for col in df.columns:
-            # Convert column to string to avoid errors on numeric columns, then apply cleaning
-            df[col] = df[col].astype(str).apply(clean_text)
-
-        st.write("Cleaned Data:")
-        st.dataframe(df.head())
-
         # Convert the cleaned DataFrame back to an Excel file in memory
         output = BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
